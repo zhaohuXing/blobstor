@@ -25,6 +25,7 @@ create table users (
 	phone varchar(11) not null,
 	password varchar(255) not null,
 	nickname varchar(16) not null,
+	role varchar(8) defalut 'user',
 	create_time timestamp not null,
 	primary key(id)
 )engine = innodb default charset = utf8 auto_increment=1000;
