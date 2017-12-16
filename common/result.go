@@ -34,6 +34,10 @@ func init() {
 		Code:    HTTP_METHOD_NOT_ALLOWED,
 		Message: "The request method is not allowed",
 	}
+	ResponseFactory[ErrUserNotExistError] = &Response{
+		Code:    HTTP_NOT_RESOURCE,
+		Message: "the user not exists.",
+	}
 }
 
 type Response struct {

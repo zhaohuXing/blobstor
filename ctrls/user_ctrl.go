@@ -27,7 +27,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[info] Register controller process args: %+v", val)
 		if err != nil || val.Phone == "" || val.Password == "" ||
 			val.Nickname == "" || val.Verify == "" {
-			log.Println("[error] The register argument is invalid")
+			log.Println("[error] The Register argument is invalid")
 			response = ResponseFactory[ErrInvalidArgumentError]
 		} else {
 			user = &model.User{
@@ -44,7 +44,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		log.Println("[warn] Not supported %s", r.Method)
-
+		response = ResponseFactory[HTTP_METHOD_NOT_ALLOWED]
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(response.ToJson()))
@@ -63,7 +63,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		var val Val
 		err := LoadBody(r.Body, &val)
 		if err != nil || val.Phone == "" || val.Password == "" {
-			log.Println("[error] The register argument is invalid")
+			log.Println("[error] The Login argument is invalid")
 			response = ResponseFactory[ErrInvalidArgumentError]
 			goto JSONEND
 		}
@@ -71,6 +71,40 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			response = ResponseFactory[HTTP_OK]
 		} else {
+			response = ResponseFactory[err]
+		}
+	default:
+		log.Println("[warn] Not supported %s", r.Method)
+		response = ResponseFactory[HTTP_METHOD_NOT_ALLOWED]
+	}
+JSONEND:
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(response.ToJson()))
+}
+
+func PwdReset(w http.ResponseWriter, r *http.Request) {
+	log.Printf("[info] %s /password/reset", r.Method)
+	defer log.Println("[info] PwdReset controller done")
+	var response *Response
+	switch r.Method {
+	case "POST":
+		type Val struct {
+			Phone    string `json:"phone"`
+			Password string `json:"password"`
+			Verify   string `json:"verify"`
+		}
+		var val Val
+		err := LoadBody(r.Body, &val)
+		if err != nil || val.Phone == "" || val.Password == "" || val.Verify == "" {
+			log.Println("[error] The PwdReset argument is invalid")
+			response = ResponseFactory[ErrInvalidArgumentError]
+			goto JSONEND
+		}
+		err = service.PwdReset(val.Phone, val.Password, val.Verify)
+		if err == nil {
+			response = ResponseFactory[HTTP_OK]
+		} else {
+			log.Println("[error] password reset failed")
 			response = ResponseFactory[err]
 		}
 	default:

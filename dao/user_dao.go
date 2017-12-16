@@ -174,3 +174,32 @@ func GetUsers() ([]*model.User, error) {
 	}
 	return users, nil
 }
+
+func UpdatePassword(phone, password string) error {
+	log.Println("[info] UpdatePassword process")
+	defer log.Println(" [info] UpdatePassword done")
+	failedErrorf := func(err error) {
+		log.Printf("[error] exec UpdatePassword failed: %s", err)
+	}
+
+	sql := "update users set password = ? where phone = ?"
+	stmt, err := Connect().Prepare(sql)
+	if err != nil {
+		failedErrorf(err)
+		return err
+	}
+
+	encryptedPwd := fmt.Sprintf("%x", sha1.Sum([]byte(password+phone)))
+	res, err := stmt.Exec(encryptedPwd, phone)
+	if err != nil {
+		failedErrorf(err)
+		return err
+	}
+
+	_, err = res.RowsAffected()
+	if err != nil {
+		failedErrorf(err)
+		return err
+	}
+	return nil
+}

@@ -1,4 +1,4 @@
-package kv
+package lib
 
 import (
 	"fmt"
@@ -64,7 +64,7 @@ func SetSession(phone, addr string) error {
 	return nil
 }
 
-func GetSession(phone, addr string) error {
+func GetSession(phone, addr string) (string, error) {
 	log.Printf("[info] GetSession process args: phone = %s, addr = %s", phone, addr)
 	defer log.Println("[info] GetSession done")
 	val, err := getValue(phone + addr)
